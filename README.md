@@ -4,7 +4,9 @@
 
 # Usage
 
-Read `python links.py --help`.
+First, install the dependencies with `pip install -r requirements.txt`. 
+
+Then, read `python links.py --help`.
 
 # Examples
 
