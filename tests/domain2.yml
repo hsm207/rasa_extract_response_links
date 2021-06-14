@@ -12,29 +12,8 @@ intents:
 responses:
   utter_other_domain:
   - text: Define a form by adding it to the forms section in your [domain](https://rasa.com/docs/rasa/domain)
-  utter_greet:
-  - text: "Hey! How are you?"
-    buttons:
-    - title: "great"
-      payload: "/mood_great"
-    - title: "super sad"
-      payload: "/mood_unhappy"
-
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-  - text: "Did that help you?"
-
-  utter_happy:
-  - text: "Great, carry on!"
-
-  utter_goodbye:
-  - text: "Bye"
-
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
+  utter_no_link:
+  - text: "Hey! There's no link here?"
 
 session_config:
   session_expiration_time: 60  # value in minutes
