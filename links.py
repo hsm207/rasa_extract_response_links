@@ -85,7 +85,7 @@ def main(domain: str, out: str):
     bot_responses = [
         {response_name: response_details}
         for response_name, response_details in bot_responses.items()
-        if has_text_field(response_details)
+        if has_text_field(response_details) and has_hyperlink_in_text(response_details)
     ]
 
     pass
