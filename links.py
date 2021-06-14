@@ -2,11 +2,12 @@ from rasa.core.nlg.response import TemplatedNaturalLanguageGenerator
 from rasa.shared.core.domain import Domain
 import re
 import pandas as pd
-from typing import ItemsView, Text, List, Dict, Any
+from typing import ItemsView, Text, List, Dict, Any, Tuple
 import click
 
 
 HAS_MARKDOWN_URL = "\[[\w\s]+\]\([^)]+\)"
+MARKDOWN_URL = "\[([\w\s]+)\]\(([^)]+)\)"
 
 
 def extract_links_from_item(item: Text) -> List[str]:
@@ -71,13 +72,44 @@ def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
     return True if re.search(HAS_MARKDOWN_URL, text_field) else False
 
 
+def extract_url(text: str) -> List[Tuple[str, str]]:
+    return re.findall(MARKDOWN_URL, text)
+
+
+def parse_bot_response(bot_response: Dict[Text, Any]) -> List[str]:
+    results = []
+
+    for response_name, response_details in bot_response.items():
+        text_field = text_field = next(
+            d["text"] for d in response_details if "text" in d
+        )
+        urls = extract_url(text_field)
+        results.append(response_name)
+        results.append(urls)
+
+    return results
+
+
+def make_report(results) -> pd.DataFrame:
+    df = pd.DataFrame(results, columns=["response_name", "details"]).explode("details")
+
+    title, link = df["details"].str
+
+    df["title"] = title
+    df["link"] = link
+
+    return df.drop("details", axis=1)
+
+
 @click.command()
 @click.option(
     "--domain",
     default=".",
     help="Path to a domain file or folder containing domain files",
 )
-@click.option("--out", default=".", help="Path to save extraction results")
+@click.option(
+    "--out", default="./extraction_results.csv", help="Path to save extraction results"
+)
 def main(domain: str, out: str):
     """A script to extract hyperlinks from the responses in a domain file."""
     bot_responses = Domain.load(domain).responses
@@ -88,7 +120,10 @@ def main(domain: str, out: str):
         if has_text_field(response_details) and has_hyperlink_in_text(response_details)
     ]
 
-    pass
+    results = [parse_bot_response(br) for br in bot_responses]
+    report = make_report(results)
+
+    report.to_csv(out, index=False)
 
 
 if __name__ == "__main__":
