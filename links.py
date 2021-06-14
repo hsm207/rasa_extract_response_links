@@ -56,6 +56,13 @@ def extract_links(response: Dict[Text, Any]):
 #  (response_name, link_title, link)
 #  pandas.to_csv
 
+BotResponseDetails = List[Dict[Text, Any]]
+
+def _has_text_field(response: BotResponseDetails) -> bool:
+    return any("text" in d for d in response)
+
+def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
+    pass
 
 @click.command()
 @click.option(
@@ -66,6 +73,7 @@ def extract_links(response: Dict[Text, Any]):
 @click.option("--out", default=".", help="Path to save extraction results")
 def main(domain: str, out: str):
     """ A script to extract hyperlinks from the responses in a domain file."""
+    bot_responses = Domain.load(domain).responses
     pass
 
 
