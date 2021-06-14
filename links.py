@@ -1,64 +1,14 @@
+import re
+from typing import Any, Dict, ItemsView, List, Text, Tuple
+
+import click
+import pandas as pd
 from rasa.core.nlg.response import TemplatedNaturalLanguageGenerator
 from rasa.shared.core.domain import Domain
-import re
-import pandas as pd
-from typing import ItemsView, Text, List, Dict, Any, Tuple
-import click
-
 
 HAS_MARKDOWN_URL = "\[[\w\s]+\]\([^)]+\)"
 MARKDOWN_URL = "\[([\w\s]+)\]\(([^)]+)\)"
 
-
-def extract_links_from_item(item: Text) -> List[str]:
-    print(item)
-    # we want to regex match all instances of [title](link), e.g.
-    # - text: "You can find more info on the [Domains](rasa.com/docs/rasa/domains) page."
-
-    links = re.findall(r"some regex here", item)
-    if links:
-        print(links)
-    print()
-    return links
-
-
-def extract_links(response: Dict[Text, Any]):
-    """Recursively process response and interpolate any text keys.
-
-    Args:
-        response: The response that should be interpolated.
-        values: A dictionary of keys and the values that those
-            keys should be replaced with.
-
-    Returns:
-        The response with any replacements made.
-    """
-    links = []
-    # from https://github.com/RasaHQ/rasa/blob/main/rasa/core/nlg/interpolator.py#L49
-    # should probably be edited to return a list of links, instead of updating the responses in place
-    if isinstance(response, str):
-        return extract_links_from_item(response)
-    elif isinstance(response, dict):
-        for k, v in response.items():
-            if isinstance(v, dict):
-                extract_links(v)
-            elif isinstance(v, list):
-                response[k] = [extract_links(i) for i in v]
-            elif isinstance(v, str):
-                response[k] = extract_links_from_item(v)
-        return response
-    elif isinstance(response, list):
-        return [extract_links(i) for i in response]
-    return response
-
-
-# domain = Domain.load("domain.yml")  # This should probably handle multi domain
-# for response_name, response_content in domain.responses.items():
-#     extract_links(response_content)
-
-#  Output: a csv of links, their titles, and the response name they came from
-#  (response_name, link_title, link)
-#  pandas.to_csv
 
 BotResponseDetails = List[Dict[Text, Any]]
 
@@ -91,15 +41,17 @@ def parse_bot_response(bot_response: Dict[Text, Any]) -> List[str]:
 
 
 def make_report(results) -> pd.DataFrame:
-    df1 = pd.DataFrame(results, columns=["response_name", "details"])\
-            .explode("details")\
-            .reset_index(drop=True)
+    df1 = (
+        pd.DataFrame(results, columns=["response_name", "details"])
+        .explode("details")
+        .reset_index(drop=True)
+    )
 
-    df2 = pd.DataFrame(df1["details"].tolist(), columns=["title", "link"])\
-            .reset_index(drop=True)
+    df2 = pd.DataFrame(df1["details"].tolist(), columns=["title", "link"]).reset_index(
+        drop=True
+    )
 
     return pd.concat([df1, df2], axis=1).drop("details", axis=1)
-
 
 
 @click.command()
