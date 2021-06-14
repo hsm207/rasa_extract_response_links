@@ -7,6 +7,6 @@ import links
     ([{'image': 'https://i.imgur.com/nGF1K8f.jpg'}], False)
 ])
 def test_has_text_field(test_input, expected_output):
-    actual_output = links._has_text_field(test_input)
+    actual_output = links.has_text_field(test_input)
     assert actual_output == expected_output
     

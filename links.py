@@ -58,7 +58,7 @@ def extract_links(response: Dict[Text, Any]):
 
 BotResponseDetails = List[Dict[Text, Any]]
 
-def _has_text_field(response: BotResponseDetails) -> bool:
+def has_text_field(response: BotResponseDetails) -> bool:
     return any("text" in d for d in response)
 
 def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
@@ -74,6 +74,7 @@ def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
 def main(domain: str, out: str):
     """ A script to extract hyperlinks from the responses in a domain file."""
     bot_responses = Domain.load(domain).responses
+    
     pass
 
 
