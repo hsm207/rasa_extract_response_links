@@ -2,8 +2,11 @@ from rasa.core.nlg.response import TemplatedNaturalLanguageGenerator
 from rasa.shared.core.domain import Domain
 import re
 import pandas as pd
-from typing import Text, List, Dict, Any
+from typing import ItemsView, Text, List, Dict, Any
 import click
+
+
+HAS_MARKDOWN_URL = "\[[\w\s]+\]\([^)]+\)"
 
 
 def extract_links_from_item(item: Text) -> List[str]:
@@ -58,11 +61,15 @@ def extract_links(response: Dict[Text, Any]):
 
 BotResponseDetails = List[Dict[Text, Any]]
 
+
 def has_text_field(response: BotResponseDetails) -> bool:
     return any("text" in d for d in response)
 
+
 def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
-    pass
+    text_field = next(d["text"] for d in response if "text" in d)
+    return True if re.search(HAS_MARKDOWN_URL, text_field) else False
+
 
 @click.command()
 @click.option(
@@ -72,9 +79,15 @@ def has_hyperlink_in_text(response: BotResponseDetails) -> bool:
 )
 @click.option("--out", default=".", help="Path to save extraction results")
 def main(domain: str, out: str):
-    """ A script to extract hyperlinks from the responses in a domain file."""
+    """A script to extract hyperlinks from the responses in a domain file."""
     bot_responses = Domain.load(domain).responses
-    
+
+    bot_responses = [
+        {response_name: response_details}
+        for response_name, response_details in bot_responses.items()
+        if has_text_field(response_details)
+    ]
+
     pass
 
 
