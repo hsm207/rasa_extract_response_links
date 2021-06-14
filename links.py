@@ -3,6 +3,7 @@ from rasa.shared.core.domain import Domain
 import re
 import pandas as pd
 from typing import Text, List, Dict, Any
+import click
 
 
 def extract_links_from_item(item: Text) -> List[str]:
@@ -46,10 +47,27 @@ def extract_links(response: Dict[Text, Any]):
         return [extract_links(i) for i in response]
     return response
 
-domain = Domain.load("domain.yml")  # This should probably handle multi domain
-for response_name, response_content in domain.responses.items():
-    extract_links(response_content)
+
+# domain = Domain.load("domain.yml")  # This should probably handle multi domain
+# for response_name, response_content in domain.responses.items():
+#     extract_links(response_content)
 
 #  Output: a csv of links, their titles, and the response name they came from
 #  (response_name, link_title, link)
 #  pandas.to_csv
+
+
+@click.command()
+@click.option(
+    "--domain",
+    default=".",
+    help="Path to a domain file or folder containing domain files",
+)
+@click.option("--out", default=".", help="Path to save extraction results")
+def main(domain: str, out: str):
+    """ A script to extract hyperlinks from the responses in a domain file."""
+    pass
+
+
+if __name__ == "__main__":
+    main()
