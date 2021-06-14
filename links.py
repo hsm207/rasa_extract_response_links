@@ -91,14 +91,15 @@ def parse_bot_response(bot_response: Dict[Text, Any]) -> List[str]:
 
 
 def make_report(results) -> pd.DataFrame:
-    df = pd.DataFrame(results, columns=["response_name", "details"]).explode("details")
+    df1 = pd.DataFrame(results, columns=["response_name", "details"])\
+            .explode("details")\
+            .reset_index(drop=True)
 
-    title, link = df["details"].str
+    df2 = pd.DataFrame(df1["details"].tolist(), columns=["title", "link"])\
+            .reset_index(drop=True)
 
-    df["title"] = title
-    df["link"] = link
+    return pd.concat([df1, df2], axis=1).drop("details", axis=1)
 
-    return df.drop("details", axis=1)
 
 
 @click.command()
