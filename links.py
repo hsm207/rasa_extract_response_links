@@ -61,9 +61,14 @@ def make_report(results) -> pd.DataFrame:
     help="Path to a domain file or folder containing domain files",
 )
 @click.option(
+    "--sep",
+    default=",",
+    help="Separator character for CSV files. Defaults to comma, but can be set to "";"" for German Excel",
+)
+@click.option(
     "--out", default="./extraction_results.csv", help="Path to save extraction results"
 )
-def main(domain: str, out: str):
+def main(domain: str, sep:str, out: str):
     """A script to extract hyperlinks from the responses in a domain file."""
     bot_responses = Domain.load(domain).responses
 
@@ -76,7 +81,7 @@ def main(domain: str, out: str):
     results = [parse_bot_response(br) for br in bot_responses]
     report = make_report(results)
 
-    report.to_csv(out, index=False)
+    report.to_csv(out, index=False, sep=sep)
 
 
 if __name__ == "__main__":
